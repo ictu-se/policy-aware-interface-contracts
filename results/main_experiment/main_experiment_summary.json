@@ -1,0 +1,17 @@
+{
+  "seed": 20260616,
+  "elapsed_seconds": 0.0506,
+  "policies": 12,
+  "variants": 120,
+  "buggy_variants": 108,
+  "test_cases": 108,
+  "findings": 12960,
+  "tables": {
+    "first_detection_triggers": 600,
+    "exposure_events": 250,
+    "baseline_failure_mechanisms": 63,
+    "ablation_loss": 36,
+    "casebook": 58,
+    "exposure_summary": 9
+  }
+}

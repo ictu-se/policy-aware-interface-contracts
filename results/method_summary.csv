@@ -1,0 +1,13 @@
+method,n_variants,tp,fp,tn,fn,precision,recall,f1,risk_weighted_recall,mean_tests_per_variant,mean_flags_per_variant
+audit_contract_tests,120,12,0,12,96,1.0,0.1111,0.2,0.0402,9.0,0.9
+auth_required,120,12,0,12,96,1.0,0.1111,0.2,0.2678,9.0,0.1
+deprecated_inventory_tests,120,12,0,12,96,1.0,0.1111,0.2,0.1205,9.0,0.1
+field_policy_tests,120,24,0,12,84,1.0,0.2222,0.3636,0.1564,9.0,0.58
+full_without_audit,120,96,0,12,12,1.0,0.8889,0.9412,0.9598,9.0,1.18
+full_without_field_scope,120,84,0,12,24,1.0,0.7778,0.875,0.8436,9.0,1.5
+full_without_object_scope,120,84,0,12,24,1.0,0.7778,0.875,0.7992,9.0,1.88
+full_without_purpose,120,96,0,12,12,1.0,0.8889,0.9412,0.9464,9.0,1.98
+object_policy_tests,120,48,0,12,60,1.0,0.4444,0.6154,0.6293,9.0,0.4
+policy_aware_full,120,108,0,12,0,1.0,1.0,1.0,1.0,9.0,2.08
+role_matrix,120,24,0,12,84,1.0,0.2222,0.3636,0.4285,9.0,0.2
+schema_validation,120,0,0,12,108,0.0,0.0,0.0,0.0,9.0,0.0

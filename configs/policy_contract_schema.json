@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PolicyContract",
+  "type": "object",
+  "required": [
+    "domain",
+    "endpoint",
+    "resource",
+    "operation",
+    "roles",
+    "purposes",
+    "object_scope",
+    "fields",
+    "allowed_by_role",
+    "audit_required"
+  ],
+  "properties": {
+    "domain": { "type": "string" },
+    "endpoint": { "type": "string" },
+    "resource": { "type": "string" },
+    "operation": {
+      "type": "string",
+      "enum": ["create", "read", "update", "delete", "search", "export"]
+    },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "purposes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "object_scope": { "type": "string" },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "sensitivity"],
+        "properties": {
+          "name": { "type": "string" },
+          "sensitivity": {
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "personal",
+              "identity",
+              "financial",
+              "health",
+              "child",
+              "disciplinary"
+            ]
+          }
+        }
+      }
+    },
+    "allowed_by_role": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "audit_required": { "type": "boolean" },
+    "deprecated": { "type": "boolean" }
+  }
+}

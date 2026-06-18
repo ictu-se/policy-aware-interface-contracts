@@ -1,0 +1,85 @@
+{
+  "seed": 20260616,
+  "policies": 12,
+  "variants": 120,
+  "buggy_variants": 108,
+  "test_cases": 108,
+  "methods": [
+    "schema_validation",
+    "auth_required",
+    "role_matrix",
+    "object_policy_tests",
+    "field_policy_tests",
+    "audit_contract_tests",
+    "deprecated_inventory_tests",
+    "policy_aware_full",
+    "full_without_object_scope",
+    "full_without_field_scope",
+    "full_without_audit",
+    "full_without_purpose"
+  ],
+  "test_suites": {
+    "auth_smoke": [
+      "unauthenticated",
+      "valid"
+    ],
+    "role_matrix_min": [
+      "unauthenticated",
+      "valid",
+      "wrong_role"
+    ],
+    "object_scope": [
+      "self_access",
+      "unauthenticated",
+      "valid",
+      "wrong_jurisdiction",
+      "wrong_role"
+    ],
+    "purpose_object_scope": [
+      "self_access",
+      "unauthenticated",
+      "valid",
+      "wrong_jurisdiction",
+      "wrong_purpose",
+      "wrong_role"
+    ],
+    "privacy_scope": [
+      "aggregation_boundary",
+      "sensitive_field_probe",
+      "valid"
+    ],
+    "no_inventory": [
+      "aggregation_boundary",
+      "self_access",
+      "sensitive_field_probe",
+      "unauthenticated",
+      "valid",
+      "wrong_jurisdiction",
+      "wrong_purpose",
+      "wrong_role"
+    ],
+    "full": [
+      "aggregation_boundary",
+      "deprecated_inventory",
+      "self_access",
+      "sensitive_field_probe",
+      "unauthenticated",
+      "valid",
+      "wrong_jurisdiction",
+      "wrong_purpose",
+      "wrong_role"
+    ]
+  },
+  "bug_types": {
+    "correct": 12,
+    "missing_auth": 12,
+    "overbroad_role": 12,
+    "missing_object_check": 12,
+    "jurisdiction_bypass": 12,
+    "purpose_bypass": 12,
+    "missing_field_filter": 12,
+    "aggregation_leak": 12,
+    "missing_audit_log": 12,
+    "deprecated_exposed": 12
+  }
+}

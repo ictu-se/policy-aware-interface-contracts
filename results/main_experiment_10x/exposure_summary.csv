@@ -1,0 +1,10 @@
+bug_type,primary_dimension,violation_events,events_with_extra_fields,total_extra_fields,total_extra_sensitive_fields,max_extra_sensitivity,total_event_risk
+aggregation_leak,aggregation_boundary,120,120,290,230,5,1100.0
+deprecated_exposed,endpoint_inventory,120,120,290,230,5,1580.0
+jurisdiction_bypass,jurisdiction_scope,120,120,670,530,5,5530.0
+missing_audit_log,audit_obligation,1080,0,0,0,0,3240.0
+missing_auth,authentication,120,120,960,760,5,6630.0
+missing_field_filter,field_minimization,580,580,1430,1110,5,5370.0
+missing_object_check,object_scope,120,120,670,530,5,5530.0
+overbroad_role,function_authorization,120,120,960,760,5,6630.0
+purpose_bypass,purpose_scope,120,120,670,530,5,5530.0
