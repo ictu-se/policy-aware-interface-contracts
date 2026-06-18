@@ -20,6 +20,20 @@ submission artifacts.
 - `docs/`: experiment protocols.
 - `requirements.txt`: dependency note. The deterministic benchmark uses only
   the Python standard library.
+- `MANIFEST.md`: traceability map for included artifacts.
+- `LICENSE`: reuse terms for the replication package.
+
+## Runtime and Archival Status
+
+The deterministic benchmark was verified with Python 3.9.6 and uses only the
+Python standard library. Local LLM inference was run with Ollama 0.30.7. The
+raw LLM outputs included in this repository are the reproducibility source for
+reported model scores, because local model decoding can vary across runtime
+and model revisions.
+
+This GitHub repository is the current public replication package. A versioned
+GitHub release and external archival DOI can be added after journal submission
+or acceptance; no DOI is claimed here.
 
 ## Deterministic Benchmark
 
@@ -119,6 +133,21 @@ LLM inference is not deterministic across all model/runtime versions. The
 included JSONL outputs are the source used to reproduce the reported score
 tables.
 
+The fixed-prompt run used these Ollama model identifiers where available in the
+local runtime:
+
+- `deepseek-coder:6.7b` (`ce298d984115`)
+- `gemma3:4b` (`a2af6cc3eb7f`)
+- `llama3.2:3b` (`a80c4f17acd5`)
+- `phi3:mini` (`4f2222927938`)
+- `qwen2.5-coder:1.5b` (`d7372fd82851`)
+- `qwen2.5-coder:3b` (`f72c60cabf62`)
+- `qwen2.5-coder:7b` (`dae161e27b0e`)
+- `qwen2.5-coder:14b` (`9ec8897f747e`)
+- `qwen2.5-coder:32b` (`b92d6a0bd47e`)
+- `qwen2.5:3b` (`357c53fb659c`)
+- `qwen3:4b` (`359d7dd4bcda`)
+
 ## Quick Verification
 
 The following commands should complete without third-party Python packages:
@@ -131,6 +160,31 @@ python3 scripts/sensitivity_and_benign_stress.py --seed 20260616 --multiplier 10
 python3 scripts/score_llm_policy_judge.py --results-dir results/llm_policy_judge
 python3 scripts/score_llm_policy_judge.py --results-dir results/llm_prompt_ablation
 ```
+
+These commands regenerate the deterministic benchmark tables and rescore the
+included LLM outputs. On a typical laptop, the deterministic checks complete in
+minutes; rerunning local LLM inference is intentionally excluded from the quick
+path.
+
+## Figure and Table Traceability
+
+- Manuscript Table 1: conformance levels defined in the manuscript and schema.
+- Manuscript Table 2: policy dimensions defined in the manuscript and schema.
+- Manuscript Table 3: `results/main_experiment_10x/main_experiment_summary.json`.
+- Manuscript Table 4: `results/nested_policy_stress_10x/nested_policy_stress_summary.csv`.
+- Figure 1: `results/main_experiment_10x/policy_detection_results.csv`,
+  `results/main_experiment_10x/exposure_summary.csv`, and
+  `results/main_experiment_10x/first_detection_triggers.csv`.
+- Figure 2: `results/main_experiment_10x/method_summary.csv`,
+  `results/sensitivity_and_benign_stress/risk_weight_sensitivity.csv`,
+  `results/sensitivity_and_benign_stress/benign_variation_summary.csv`, and
+  `results/nested_policy_stress_10x/nested_policy_stress_summary.csv`.
+- Figure 3: `results/main_experiment_10x/recall_by_bug_family.csv`.
+- Figure 4: `results/main_experiment_10x/exposure_summary.csv`.
+- Figure 5: `results/main_experiment_10x/ablation_loss.csv`.
+- Figure 6: `results/llm_policy_judge/llm_policy_judge_summary.csv`.
+- Figure 7: `results/llm_policy_judge/llm_policy_judge_by_group.csv`.
+- Figure 8: `results/llm_prompt_ablation/llm_policy_judge_summary.csv`.
 
 ## Data Ethics
 

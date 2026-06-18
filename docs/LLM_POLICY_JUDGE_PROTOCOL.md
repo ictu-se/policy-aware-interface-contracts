@@ -34,7 +34,7 @@ The model must return strict JSON with:
 
 ## Models
 
-The run used 10 local Ollama models:
+The fixed-prompt run used 11 local Ollama models:
 
 - `qwen2.5-coder:1.5b`
 - `qwen2.5-coder:3b`
@@ -42,13 +42,16 @@ The run used 10 local Ollama models:
 - `qwen2.5-coder:14b`
 - `qwen2.5-coder:32b`
 - `deepseek-coder:6.7b`
+- `gemma3:4b`
 - `qwen2.5:3b`
 - `qwen3:4b`
 - `llama3.2:3b`
 - `phi3:mini`
 
-Each model was evaluated on 120 balanced policy-judge cases, for 1,200 local
-LLM judgments.
+Each model was evaluated on 120 balanced policy-judge cases, for 1,320 fixed
+prompt local LLM judgments. The prompt-ablation experiment adds 1,080
+judgments across three representative models and three prompt modes, yielding
+2,400 judgments across the full LLM study.
 
 ## Commands
 

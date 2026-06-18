@@ -9,6 +9,9 @@ Included:
 - Deterministic result tables used by the manuscript.
 - Raw local LLM JSONL outputs needed to recompute reported LLM score tables.
 - Experiment protocol documents and dependency note.
+- MIT license file.
+- Traceability notes linking manuscript figures and tables to result files in
+  `README.md`.
 
 Excluded:
 
@@ -19,3 +22,8 @@ Excluded:
 
 The repository is intended only for reproducing code, data, experiments, and
 result tables.
+
+Archival status:
+
+- Current public repository: `https://github.com/ictu-se/policy-aware-interface-contracts`
+- External DOI snapshot: not yet minted.
