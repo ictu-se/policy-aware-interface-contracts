@@ -1,0 +1,15 @@
+{
+  "seed": 20260616,
+  "multiplier": 10,
+  "policies": 120,
+  "variants": 1200,
+  "buggy_variants": 1080,
+  "benign_cases": 4440,
+  "risk_schemes": [
+    "equal",
+    "severity_only",
+    "current",
+    "privacy_heavy",
+    "audit_inventory_heavy"
+  ]
+}

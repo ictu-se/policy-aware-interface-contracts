@@ -72,6 +72,24 @@ python3 scripts/nested_policy_stress_experiment.py \
 This reproduces 280 dependent-policy scenarios and 3,080
 method-scenario judgments.
 
+## Risk Sensitivity and Benign-Variation Stress
+
+Run the additional validation checks:
+
+```bash
+python3 scripts/sensitivity_and_benign_stress.py \
+  --seed 20260616 \
+  --multiplier 10 \
+  --out-dir results/sensitivity_and_benign_stress
+```
+
+This reproduces:
+
+- five risk-weighting schemes: equal, severity-only, current, privacy-heavy,
+  and audit/inventory-heavy;
+- the full suite's rank-1 weighted recall under all five schemes;
+- 4,440 benign policy-compliant response variants with zero false positives.
+
 ## Local LLM Policy-Judge Experiments
 
 The repository includes the raw local model outputs used for scoring. To
@@ -109,6 +127,7 @@ The following commands should complete without third-party Python packages:
 python3 scripts/policy_contract_benchmark.py --seed 20260616 --multiplier 10 --out-dir /tmp/policy_contract_benchmark_10x
 python3 scripts/main_experiment.py --seed 20260616 --multiplier 10 --out-dir /tmp/main_experiment_10x
 python3 scripts/nested_policy_stress_experiment.py --multiplier 10 --out-dir /tmp/nested_policy_stress_10x
+python3 scripts/sensitivity_and_benign_stress.py --seed 20260616 --multiplier 10 --out-dir /tmp/sensitivity_and_benign_stress
 python3 scripts/score_llm_policy_judge.py --results-dir results/llm_policy_judge
 python3 scripts/score_llm_policy_judge.py --results-dir results/llm_prompt_ablation
 ```

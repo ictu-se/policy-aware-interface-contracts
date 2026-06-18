@@ -3,7 +3,8 @@
 Included:
 
 - Source code for benchmark generation, main experiment analysis,
-  dependent-policy stress testing, and local LLM policy-judge scoring.
+  dependent-policy stress testing, risk-sensitivity and benign-variation
+  stress testing, and local LLM policy-judge scoring.
 - Policy-contract schema and generated synthetic benchmark cases.
 - Deterministic result tables used by the manuscript.
 - Raw local LLM JSONL outputs needed to recompute reported LLM score tables.

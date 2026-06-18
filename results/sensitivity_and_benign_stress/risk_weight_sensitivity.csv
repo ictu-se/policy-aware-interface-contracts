@@ -1,0 +1,61 @@
+risk_scheme,scheme_description,method,weighted_recall,detected_weight,total_weight,rank
+equal,Every injected bug receives weight 1.,policy_aware_full,1.0,1080.0,1080.0,1
+equal,Every injected bug receives weight 1.,full_without_audit,0.8889,960.0,1080.0,2
+equal,Every injected bug receives weight 1.,full_without_purpose,0.8889,960.0,1080.0,3
+equal,Every injected bug receives weight 1.,full_without_field_scope,0.7778,840.0,1080.0,4
+equal,Every injected bug receives weight 1.,full_without_object_scope,0.7778,840.0,1080.0,5
+equal,Every injected bug receives weight 1.,object_policy_tests,0.4444,480.0,1080.0,6
+equal,Every injected bug receives weight 1.,field_policy_tests,0.2222,240.0,1080.0,7
+equal,Every injected bug receives weight 1.,role_matrix,0.2222,240.0,1080.0,8
+equal,Every injected bug receives weight 1.,audit_contract_tests,0.1111,120.0,1080.0,9
+equal,Every injected bug receives weight 1.,auth_required,0.1111,120.0,1080.0,10
+equal,Every injected bug receives weight 1.,deprecated_inventory_tests,0.1111,120.0,1080.0,11
+equal,Every injected bug receives weight 1.,schema_validation,0.0,0,1080.0,12
+severity_only,Each bug receives its injected severity weight.,policy_aware_full,1.0,4560.0,4560.0,1
+severity_only,Each bug receives its injected severity weight.,full_without_audit,0.9211,4200.0,4560.0,2
+severity_only,Each bug receives its injected severity weight.,full_without_purpose,0.8947,4080.0,4560.0,3
+severity_only,Each bug receives its injected severity weight.,full_without_field_scope,0.7632,3480.0,4560.0,4
+severity_only,Each bug receives its injected severity weight.,full_without_object_scope,0.7368,3360.0,4560.0,5
+severity_only,Each bug receives its injected severity weight.,object_policy_tests,0.5,2280.0,4560.0,6
+severity_only,Each bug receives its injected severity weight.,field_policy_tests,0.2368,1080.0,4560.0,7
+severity_only,Each bug receives its injected severity weight.,role_matrix,0.2368,1080.0,4560.0,8
+severity_only,Each bug receives its injected severity weight.,auth_required,0.1316,600.0,4560.0,9
+severity_only,Each bug receives its injected severity weight.,audit_contract_tests,0.0789,360.0,4560.0,10
+severity_only,Each bug receives its injected severity weight.,deprecated_inventory_tests,0.0789,360.0,4560.0,11
+severity_only,Each bug receives its injected severity weight.,schema_validation,0.0,0,4560.0,12
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",policy_aware_full,1.0,851400.0,851400.0,1
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",full_without_audit,0.9598,817200.0,851400.0,2
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",full_without_purpose,0.9464,805800.0,851400.0,3
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",full_without_field_scope,0.8436,718200.0,851400.0,4
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",full_without_object_scope,0.7992,680400.0,851400.0,5
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",object_policy_tests,0.6293,535800.0,851400.0,6
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",role_matrix,0.4285,364800.0,851400.0,7
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",auth_required,0.2678,228000.0,851400.0,8
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",field_policy_tests,0.1564,133200.0,851400.0,9
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",deprecated_inventory_tests,0.1205,102600.0,851400.0,10
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",audit_contract_tests,0.0402,34200.0,851400.0,11
+current,"The benchmark's severity, exposure, scope, and sensitivity weight.",schema_validation,0.0,0,851400.0,12
+privacy_heavy,Privacy dimensions receive additional emphasis.,policy_aware_full,1.0,1259340.0,1259340.0,1
+privacy_heavy,Privacy dimensions receive additional emphasis.,full_without_audit,0.9728,1225140.0,1259340.0,2
+privacy_heavy,Privacy dimensions receive additional emphasis.,full_without_purpose,0.9384,1181820.0,1259340.0,3
+privacy_heavy,Privacy dimensions receive additional emphasis.,full_without_field_scope,0.7885,992940.0,1259340.0,4
+privacy_heavy,Privacy dimensions receive additional emphasis.,full_without_object_scope,0.7556,951540.0,1259340.0,5
+privacy_heavy,Privacy dimensions receive additional emphasis.,object_policy_tests,0.6101,768360.0,1259340.0,6
+privacy_heavy,Privacy dimensions receive additional emphasis.,role_matrix,0.3657,460560.0,1259340.0,7
+privacy_heavy,Privacy dimensions receive additional emphasis.,auth_required,0.2354,296400.0,1259340.0,8
+privacy_heavy,Privacy dimensions receive additional emphasis.,field_policy_tests,0.2115,266400.0,1259340.0,9
+privacy_heavy,Privacy dimensions receive additional emphasis.,deprecated_inventory_tests,0.0896,112860.0,1259340.0,10
+privacy_heavy,Privacy dimensions receive additional emphasis.,audit_contract_tests,0.0272,34200.0,1259340.0,11
+privacy_heavy,Privacy dimensions receive additional emphasis.,schema_validation,0.0,0,1259340.0,12
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,policy_aware_full,1.0,1042000.0,1042000.0,1
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,full_without_purpose,0.9519,991840.0,1042000.0,2
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,full_without_audit,0.9278,966760.0,1042000.0,3
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,full_without_field_scope,0.8665,902880.0,1042000.0,4
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,full_without_object_scope,0.8359,871000.0,1042000.0,5
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,object_policy_tests,0.5492,572280.0,1042000.0,6
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,role_matrix,0.3851,401280.0,1042000.0,7
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,auth_required,0.2407,250800.0,1042000.0,8
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,deprecated_inventory_tests,0.1969,205200.0,1042000.0,9
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,field_policy_tests,0.1335,139120.0,1042000.0,10
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,audit_contract_tests,0.0722,75240.0,1042000.0,11
+audit_inventory_heavy,Audit and inventory dimensions receive additional emphasis.,schema_validation,0.0,0,1042000.0,12

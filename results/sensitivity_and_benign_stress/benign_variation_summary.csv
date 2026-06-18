@@ -1,0 +1,10 @@
+case_type,n,false_positive_count,false_positive_rate,mean_returned_fields
+allowed_empty_body,600,0,0.0,0.0
+allowed_full_shuffled,600,0,0.0,5.6167
+allowed_full_sorted,600,0,0.0,5.6167
+allowed_minimal_subset,600,0,0.0,2.5333
+allowed_with_extra_audit_metadata,600,0,0.0,5.6167
+denied_audit_logged,480,0,0.0,0.0
+denied_empty_body,480,0,0.0,0.0
+deprecated_endpoint_unavailable,480,0,0.0,0.0
+overall,4440,0,0.0,2.6194
