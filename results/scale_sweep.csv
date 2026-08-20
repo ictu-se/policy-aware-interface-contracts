@@ -1,9 +1,0 @@
-multiplier,method,policies,variants,buggy_variants,tests,test_executions,elapsed_seconds,recall,risk_weighted_recall
-1,role_matrix,12,120,108,108,1080,0.0074,0.2222,0.4285
-1,policy_aware_full,12,120,108,108,1080,0.0074,1.0,1.0
-2,role_matrix,24,240,216,216,2160,0.0125,0.2222,0.4285
-2,policy_aware_full,24,240,216,216,2160,0.0125,1.0,1.0
-4,role_matrix,48,480,432,432,4320,0.0251,0.2222,0.4285
-4,policy_aware_full,48,480,432,432,4320,0.0251,1.0,1.0
-8,role_matrix,96,960,864,864,8640,0.0501,0.2222,0.4285
-8,policy_aware_full,96,960,864,864,8640,0.0501,1.0,1.0

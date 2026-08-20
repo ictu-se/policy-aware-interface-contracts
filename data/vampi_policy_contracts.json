@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "system": "VAmPI",
+  "source_revision": "f16052dce83f05847133ec98f01c5193a41de7d8",
+  "contracts": [
+    {
+      "id": "cross_owner_book_secret",
+      "operation": {"method": "GET", "path": "/books/v1/{book_title}"},
+      "resource": "book",
+      "action": "read",
+      "types": {"caller.subject": "String", "response.owner": "String"},
+      "authentication": {"required": true, "integrity": "valid_signature"},
+      "function_authorization": {"any_role": ["user", "admin"]},
+      "object_scope": {
+        "any_of": [
+          {
+            "relation": "equal",
+            "subject_operand": "caller.subject",
+            "resource_operand": "response.owner"
+          }
+        ]
+      },
+      "property_policy": {
+        "response_fields_by_role": {"user": ["book_title", "owner", "secret"]}
+      },
+      "inventory": {"status": "active", "behavior": "normal"},
+      "test": {
+        "adapter": "cross_owner_book",
+        "negative_fixture": {"caller": "name1", "resource_owner": "name2"},
+        "oracle": "object_relation",
+        "secure_control": true
+      }
+    },
+    {
+      "id": "cross_subject_password_update",
+      "operation": {"method": "PUT", "path": "/users/v1/{username}/password"},
+      "resource": "user_account",
+      "action": "update",
+      "types": {
+        "caller.subject": "String",
+        "path.username": "String",
+        "caller.roles": "StringSet",
+        "literal.admin": "String"
+      },
+      "authentication": {"required": true, "integrity": "valid_signature"},
+      "function_authorization": {"any_role": ["user", "admin"]},
+      "object_scope": {
+        "any_of": [
+          {
+            "relation": "equal",
+            "subject_operand": "caller.subject",
+            "resource_operand": "path.username"
+          },
+          {
+            "relation": "contains",
+            "subject_operand": "caller.roles",
+            "resource_operand": "literal.admin"
+          }
+        ]
+      },
+      "side_effect": {"oracle": "post_state_unchanged_for_denied_request"},
+      "inventory": {"status": "active", "behavior": "normal"},
+      "test": {
+        "adapter": "cross_subject_password_update",
+        "negative_fixture": {"caller": "name1", "path.username": "name2"},
+        "oracle": "object_relation_and_post_state",
+        "secure_control": true
+      }
+    },
+    {
+      "id": "admin_mass_assignment",
+      "operation": {"method": "POST", "path": "/users/v1/register"},
+      "resource": "user_account",
+      "action": "create",
+      "authentication": {"required": false, "integrity": "not_applicable"},
+      "function_authorization": {"any_role": ["anonymous"]},
+      "property_policy": {"forbidden_request_fields": ["admin"]},
+      "side_effect": {"oracle": "created_admin_equals_false"},
+      "inventory": {"status": "active", "behavior": "normal"},
+      "test": {
+        "adapter": "admin_mass_assignment",
+        "negative_fixture": {"request.admin": true},
+        "oracle": "request_property_and_post_state",
+        "secure_control": true
+      }
+    },
+    {
+      "id": "unauthenticated_debug_disclosure",
+      "operation": {"method": "GET", "path": "/users/v1/_debug"},
+      "resource": "user_debug_record",
+      "action": "read",
+      "authentication": {"required": true, "integrity": "valid_signature"},
+      "function_authorization": {"any_role": ["admin"]},
+      "property_policy": {"response_fields_by_role": {"admin": ["username", "email"]}},
+      "inventory": {"status": "retired", "behavior": "unavailable"},
+      "test": {
+        "adapter": "unauthenticated_debug_disclosure",
+        "negative_fixture": {"caller": "anonymous"},
+        "oracle": "authentication_response_and_inventory",
+        "secure_control": false
+      }
+    },
+    {
+      "id": "forgeable_admin_token",
+      "operation": {"method": "GET", "path": "/me"},
+      "resource": "current_principal",
+      "action": "read",
+      "types": {"token.subject": "String", "caller.subject": "String"},
+      "authentication": {"required": true, "integrity": "valid_signature"},
+      "function_authorization": {"any_role": ["user", "admin"]},
+      "object_scope": {
+        "any_of": [
+          {
+            "relation": "equal",
+            "subject_operand": "token.subject",
+            "resource_operand": "caller.subject"
+          }
+        ]
+      },
+      "inventory": {"status": "active", "behavior": "normal"},
+      "test": {
+        "adapter": "invalid_signature",
+        "negative_fixture": {"token.subject": "admin", "token.signature": "invalid"},
+        "oracle": "credential_integrity",
+        "secure_control": false
+      }
+    }
+  ]
+}

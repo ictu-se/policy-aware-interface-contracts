@@ -6,8 +6,8 @@
 - Variants: 1200
 - Injected buggy variants: 1080
 - Test cases: 1080
-- Test-level findings: 129600
-- Elapsed seconds: 0.5484
+- Test-level findings: 79200
+- Elapsed seconds: 0.3994
 
 ## Primary Result
 

@@ -50,12 +50,13 @@ def run_campaign(seed: int, multiplier: int = 1) -> dict:
     for variant in variants:
         policy = policy_map[variant.policy_id]
         tests = tests_by_policy[variant.policy_id]
-        for method in bench.METHOD_CAPABILITIES:
-            findings.extend(bench.run_method(method, policy, variant, tests))
+        execution_trace = bench.materialize_execution(policy, variant, tests)
+        for method in bench.METHODS:
+            findings.extend(bench.run_method(method, policy, variant.variant_id, tests, execution_trace))
 
     detections, summary, by_family = bench.summarize_detection(findings, variants)
-    miss_rows = bench.causal_miss_analysis(detections, findings, variants)
-    miss_summary = bench.causal_miss_summary(miss_rows)
+    miss_rows = bench.fault_dimension_miss_analysis(detections, findings, variants)
+    miss_summary = bench.fault_dimension_miss_summary(miss_rows)
 
     return {
         "seed": seed,
@@ -402,8 +403,8 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     bench.write_csv(out_dir / "method_summary.csv", campaign["summary"])
     bench.write_csv(out_dir / "recall_by_bug_family.csv", campaign["by_family"])
-    bench.write_csv(out_dir / "causal_miss_analysis.csv", campaign["miss_rows"])
-    bench.write_csv(out_dir / "causal_miss_summary.csv", campaign["miss_summary"])
+    bench.write_csv(out_dir / "fault_dimension_miss_analysis.csv", campaign["miss_rows"])
+    bench.write_csv(out_dir / "fault_dimension_miss_summary.csv", campaign["miss_summary"])
     for name, rows in tables.items():
         bench.write_csv(out_dir / f"{name}.csv", rows)
     (out_dir / "MAIN_EXPERIMENT_REPORT.md").write_text(

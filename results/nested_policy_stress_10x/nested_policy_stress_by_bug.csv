@@ -18,7 +18,7 @@ dependent_policy_full,emergency_audit_downgrade,40,40,1.0,1.0
 dependent_policy_full,jurisdiction_conditioned_field,40,40,1.0,1.0
 dependent_policy_full,purpose_conditioned_field,40,40,1.0,1.0
 dependent_without_consent,aggregation_threshold_leak,40,40,1.0,1.0
-dependent_without_consent,compound_scope_field,40,0,0.0,0.0
+dependent_without_consent,compound_scope_field,40,40,1.0,1.0
 dependent_without_consent,consent_gated_field,40,0,0.0,0.0
 dependent_without_consent,emergency_audit_downgrade,40,40,1.0,1.0
 dependent_without_consent,jurisdiction_conditioned_field,40,40,1.0,1.0

@@ -14,8 +14,8 @@
 | dependent_policy_full | 1.0 | 1.0 | 1.0 | 1.0 |
 | dependent_without_enhanced_audit | 1.0 | 0.8333 | 0.9091 | 0.9 |
 | dependent_without_threshold | 1.0 | 0.8333 | 0.9091 | 0.875 |
+| dependent_without_consent | 1.0 | 0.8333 | 0.9091 | 0.85 |
 | dependent_without_purpose_field | 1.0 | 0.8333 | 0.9091 | 0.825 |
-| dependent_without_consent | 1.0 | 0.6667 | 0.8 | 0.6 |
 | audit_contract_tests | 0.0 | 0.0 | 0.0 | 0.0 |
 | basic_policy_aware_full | 0.0 | 0.0 | 0.0 | 0.0 |
 | field_policy_tests | 0.0 | 0.0 | 0.0 | 0.0 |
@@ -40,7 +40,7 @@
 | dependent_policy_full | jurisdiction_conditioned_field | 1.0 | 1.0 |
 | dependent_policy_full | purpose_conditioned_field | 1.0 | 1.0 |
 | dependent_without_consent | aggregation_threshold_leak | 1.0 | 1.0 |
-| dependent_without_consent | compound_scope_field | 0.0 | 0.0 |
+| dependent_without_consent | compound_scope_field | 1.0 | 1.0 |
 | dependent_without_consent | consent_gated_field | 0.0 | 0.0 |
 | dependent_without_consent | emergency_audit_downgrade | 1.0 | 1.0 |
 | dependent_without_consent | jurisdiction_conditioned_field | 1.0 | 1.0 |

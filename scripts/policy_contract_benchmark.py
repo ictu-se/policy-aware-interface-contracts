@@ -138,9 +138,6 @@ class Finding:
     method: str
     variant_id: str
     test_id: str
-    bug_type: str
-    family: str
-    severity: int
     detected: bool
     risk_flagged: float
     reason: str
@@ -699,20 +696,20 @@ def expected_violation(policy: EndpointPolicy, test: TestCase, response: Respons
     return bool(reasons), reasons, risk
 
 
-METHOD_CAPABILITIES = {
-    "schema_validation": set(),
-    "auth_required": {"missing_auth"},
-    "role_matrix": {"missing_auth", "overbroad_role"},
-    "object_policy_tests": {"missing_auth", "overbroad_role", "missing_object_check", "jurisdiction_bypass"},
-    "field_policy_tests": {"missing_field_filter", "aggregation_leak"},
-    "audit_contract_tests": {"missing_audit_log"},
-    "deprecated_inventory_tests": {"deprecated_exposed"},
-    "policy_aware_full": {"missing_auth", "overbroad_role", "missing_object_check", "jurisdiction_bypass", "purpose_bypass", "missing_field_filter", "aggregation_leak", "missing_audit_log", "deprecated_exposed"},
-    "full_without_object_scope": {"missing_auth", "overbroad_role", "purpose_bypass", "missing_field_filter", "aggregation_leak", "missing_audit_log", "deprecated_exposed"},
-    "full_without_field_scope": {"missing_auth", "overbroad_role", "missing_object_check", "jurisdiction_bypass", "purpose_bypass", "missing_audit_log", "deprecated_exposed"},
-    "full_without_audit": {"missing_auth", "overbroad_role", "missing_object_check", "jurisdiction_bypass", "purpose_bypass", "missing_field_filter", "aggregation_leak", "deprecated_exposed"},
-    "full_without_purpose": {"missing_auth", "overbroad_role", "missing_object_check", "jurisdiction_bypass", "missing_field_filter", "aggregation_leak", "missing_audit_log", "deprecated_exposed"},
-}
+METHODS = (
+    "schema_validation",
+    "auth_required",
+    "role_matrix",
+    "object_policy_tests",
+    "field_policy_tests",
+    "audit_contract_tests",
+    "deprecated_inventory_tests",
+    "policy_aware_full",
+    "full_without_object_scope",
+    "full_without_field_scope",
+    "full_without_audit",
+    "full_without_purpose",
+)
 
 
 TEST_SUITES = {
@@ -723,6 +720,25 @@ TEST_SUITES = {
     "privacy_scope": {"valid", "sensitive_field_probe", "aggregation_boundary"},
     "no_inventory": {"valid", "wrong_role", "wrong_jurisdiction", "wrong_purpose", "self_access", "unauthenticated", "sensitive_field_probe", "aggregation_boundary"},
     "full": {"valid", "wrong_role", "wrong_jurisdiction", "wrong_purpose", "self_access", "unauthenticated", "sensitive_field_probe", "aggregation_boundary", "deprecated_inventory"},
+}
+
+
+# Each method is an independently executed combination of request perturbations
+# and observable assertions. Bug labels are deliberately absent: they are used
+# only after execution to score findings against ground truth.
+METHOD_TEST_KINDS = {
+    "schema_validation": set(TEST_SUITES["full"]),
+    "auth_required": set(TEST_SUITES["auth_smoke"]),
+    "role_matrix": set(TEST_SUITES["role_matrix_min"]),
+    "object_policy_tests": set(TEST_SUITES["object_scope"]),
+    "field_policy_tests": set(TEST_SUITES["privacy_scope"]),
+    "audit_contract_tests": {"valid"},
+    "deprecated_inventory_tests": {"deprecated_inventory"},
+    "policy_aware_full": set(TEST_SUITES["full"]),
+    "full_without_object_scope": set(TEST_SUITES["full"]) - {"wrong_jurisdiction", "self_access"},
+    "full_without_field_scope": set(TEST_SUITES["full"]),
+    "full_without_audit": set(TEST_SUITES["full"]),
+    "full_without_purpose": set(TEST_SUITES["full"]) - {"wrong_purpose"},
 }
 
 
@@ -761,48 +777,107 @@ DIMENSION_BY_REASON = {
 }
 
 
-def method_can_observe(method: str, test: TestCase, reason: str) -> bool:
+def schema_oracle(response: Response) -> list[str]:
+    structurally_valid = (
+        isinstance(response.allowed, bool)
+        and isinstance(response.fields, tuple)
+        and all(isinstance(name, str) for name in response.fields)
+        and isinstance(response.audit_logged, bool)
+        and isinstance(response.deprecated_available, bool)
+    )
+    return [] if structurally_valid else ["schema_mismatch"]
+
+
+def role_oracle(policy: EndpointPolicy, test: TestCase, response: Response) -> list[str]:
+    expected_allow = test.actor.authenticated and test.actor.role in policy.roles
+    return ["role_decision_mismatch"] if response.allowed != expected_allow else []
+
+
+def object_oracle(policy: EndpointPolicy, test: TestCase, response: Response) -> list[str]:
+    expected_allow = (
+        test.actor.authenticated
+        and test.actor.role in policy.roles
+        and same_object_scope(policy, test.actor, test.obj)
+    )
+    return ["object_decision_mismatch"] if response.allowed != expected_allow else []
+
+
+def field_oracle(policy: EndpointPolicy, test: TestCase, response: Response) -> list[str]:
+    if not response.allowed:
+        return []
+    permitted = set(allowed_fields(policy, test.actor)) & set(test.requested_fields)
+    return ["field_exposure"] if set(response.fields) - permitted else []
+
+
+def independent_oracle(method: str, policy: EndpointPolicy, test: TestCase, response: Response) -> list[str]:
     if method == "schema_validation":
-        return False
+        return schema_oracle(response)
     if method == "auth_required":
-        return reason == "unauthorized_allow" and test.test_kind == "unauthenticated"
+        return ["authentication_decision_mismatch"] if test.actor.authenticated != response.allowed else []
     if method == "role_matrix":
-        return reason == "unauthorized_allow" and test.test_kind in {"unauthenticated", "wrong_role"}
+        return role_oracle(policy, test, response)
     if method == "object_policy_tests":
-        return reason in {"unauthorized_allow", "under_permission"} and test.test_kind in {"wrong_role", "wrong_jurisdiction", "self_access", "unauthenticated"}
+        return object_oracle(policy, test, response)
     if method == "field_policy_tests":
-        return reason == "field_exposure"
+        return field_oracle(policy, test, response)
     if method == "audit_contract_tests":
-        return reason == "missing_audit"
+        return ["missing_audit"] if policy.audit_required and not response.audit_logged else []
     if method == "deprecated_inventory_tests":
-        return reason == "deprecated_endpoint_exposed"
-    if method == "full_without_object_scope":
-        return reason not in {"unauthorized_allow"} or test.test_kind not in {"wrong_jurisdiction", "self_access"}
-    if method == "full_without_field_scope":
-        return reason != "field_exposure"
-    if method == "full_without_audit":
-        return reason != "missing_audit"
-    if method == "full_without_purpose":
-        return reason != "unauthorized_allow" or test.test_kind != "wrong_purpose"
+        return ["deprecated_endpoint_exposed"] if response.deprecated_available else []
+
+    _, full_reasons, _ = expected_violation(policy, test, response)
     if method == "policy_aware_full":
-        return True
-    return False
+        return full_reasons
+    if method == "full_without_object_scope":
+        return full_reasons
+    if method == "full_without_field_scope":
+        return [reason for reason in full_reasons if reason != "field_exposure"]
+    if method == "full_without_audit":
+        return [reason for reason in full_reasons if reason != "missing_audit"]
+    if method == "full_without_purpose":
+        return full_reasons
+    raise ValueError(method)
 
 
-def run_method(method: str, policy: EndpointPolicy, variant: Variant, tests: list[TestCase]) -> list[Finding]:
+def materialize_execution(
+    policy: EndpointPolicy,
+    variant: Variant,
+    tests: list[TestCase],
+) -> dict[str, Response]:
+    """Execute an implementation variant before any detection method runs.
+
+    The mutation dispatcher uses ``bug_type`` only to construct the simulated
+    implementation behavior.  The returned trace is keyed only by test ID and
+    contains observed responses; no injected-fault label is exposed to an
+    oracle.
+    """
+    return {
+        test.test_id: apply_variant(policy, variant.bug_type, test)
+        for test in tests
+    }
+
+
+def run_method(
+    method: str,
+    policy: EndpointPolicy,
+    variant_id: str,
+    tests: list[TestCase],
+    execution_trace: dict[str, Response],
+) -> list[Finding]:
+    """Evaluate a method over an observed, label-free execution trace."""
+    if method not in METHODS:
+        raise ValueError(f"unknown method: {method}")
     findings = []
-    for test in tests:
-        response = apply_variant(policy, variant.bug_type, test)
-        violation, reasons, risk = expected_violation(policy, test, response)
-        observed_reasons = [r for r in reasons if method_can_observe(method, test, r)]
-        detected = bool(observed_reasons) and variant.bug_type in METHOD_CAPABILITIES[method]
+    selected_tests = [test for test in tests if test.test_kind in METHOD_TEST_KINDS[method]]
+    for test in selected_tests:
+        response = execution_trace[test.test_id]
+        _, _, risk = expected_violation(policy, test, response)
+        observed_reasons = independent_oracle(method, policy, test, response)
+        detected = bool(observed_reasons)
         findings.append(Finding(
             method=method,
-            variant_id=variant.variant_id,
+            variant_id=variant_id,
             test_id=test.test_id,
-            bug_type=variant.bug_type,
-            family=variant.family,
-            severity=variant.severity,
             detected=detected,
             risk_flagged=risk if detected else 0.0,
             reason=";".join(observed_reasons),
@@ -942,7 +1017,7 @@ def grouped_recall(detections: list[dict], group_key: str) -> list[dict]:
     return out
 
 
-def causal_miss_analysis(detections: list[dict], findings: list[Finding], variants: list[Variant]) -> list[dict]:
+def fault_dimension_miss_analysis(detections: list[dict], findings: list[Finding], variants: list[Variant]) -> list[dict]:
     variant_by_id = {v.variant_id: v for v in variants}
     detected_by_method_variant = {
         (d["method"], d["variant_id"]): bool(d["detected"])
@@ -954,7 +1029,7 @@ def causal_miss_analysis(detections: list[dict], findings: list[Finding], varian
             oracle_findings[finding.variant_id].append(finding)
 
     rows = []
-    for method in sorted(METHOD_CAPABILITIES):
+    for method in sorted(METHODS):
         if method == "policy_aware_full":
             continue
         for variant in variants:
@@ -987,7 +1062,7 @@ def causal_miss_analysis(detections: list[dict], findings: list[Finding], varian
     return rows
 
 
-def causal_miss_summary(miss_rows: list[dict]) -> list[dict]:
+def fault_dimension_miss_summary(miss_rows: list[dict]) -> list[dict]:
     grouped = defaultdict(list)
     for row in miss_rows:
         grouped[(row["method"], row["root_cause"], row["primary_missing_dimension"])].append(row)
@@ -1019,7 +1094,8 @@ def test_budget_curve(
             for variant in variants:
                 policy = policy_map[variant.policy_id]
                 tests = [t for t in tests_by_policy[variant.policy_id] if t.test_kind in test_kinds]
-                findings.extend(run_method(method, policy, variant, tests))
+                execution_trace = materialize_execution(policy, variant, tests)
+                findings.extend(run_method(method, policy, variant.variant_id, tests, execution_trace))
             detections, summary, _ = summarize_detection(findings, variants)
             method_summary = next(row for row in summary if row["method"] == method)
             rows = [d for d in detections if d["method"] == method and d["ground_truth_bug"]]
@@ -1057,8 +1133,9 @@ def scale_sweep(
         for variant in variants:
             policy = policy_map[variant.policy_id]
             tests = tests_by_policy[variant.policy_id]
+            execution_trace = materialize_execution(policy, variant, tests)
             for method in methods:
-                findings.extend(run_method(method, policy, variant, tests))
+                findings.extend(run_method(method, policy, variant.variant_id, tests, execution_trace))
         elapsed = time.perf_counter() - started
         detections, summary, _ = summarize_detection(findings, variants)
         summary_by_method = {row["method"]: row for row in summary}
@@ -1091,7 +1168,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
             if key not in fields:
                 fields.append(key)
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -1186,7 +1263,7 @@ def make_report(
             lines.append(f"| {row['suite']} | {row['method']} | {row['tests_per_endpoint']} | {row['recall']} | {row['risk_weighted_recall']} |")
     lines.extend([
         "",
-        "## Causal Miss Summary",
+        "## Fault-Dimension Miss Summary",
         "",
         "| Method | Root cause | Primary missing dimension | Missed variants | Risk missed |",
         "|---|---|---|---:|---:|",
@@ -1241,14 +1318,15 @@ def main() -> None:
     for variant in variants:
         policy = policy_map[variant.policy_id]
         tests = tests_by_policy[variant.policy_id]
-        for method in METHOD_CAPABILITIES:
-            findings.extend(run_method(method, policy, variant, tests))
+        execution_trace = materialize_execution(policy, variant, tests)
+        for method in METHODS:
+            findings.extend(run_method(method, policy, variant.variant_id, tests, execution_trace))
 
     detections, summary, by_family = summarize_detection(findings, variants)
     by_domain = grouped_recall(detections, "domain")
     by_endpoint = grouped_recall(detections, "endpoint")
-    miss_rows = causal_miss_analysis(detections, findings, variants)
-    miss_summary = causal_miss_summary(miss_rows)
+    miss_rows = fault_dimension_miss_analysis(detections, findings, variants)
+    miss_summary = fault_dimension_miss_summary(miss_rows)
     budget_curve = test_budget_curve(policies, variants, tests_by_policy)
     scale_rows = scale_sweep(domains(), args.seed)
     deltas = paired_deltas(detections)
@@ -1264,8 +1342,8 @@ def main() -> None:
     write_csv(out_dir / "recall_by_bug_family.csv", by_family)
     write_csv(out_dir / "recall_by_domain.csv", by_domain)
     write_csv(out_dir / "recall_by_endpoint.csv", by_endpoint)
-    write_csv(out_dir / "causal_miss_analysis.csv", miss_rows)
-    write_csv(out_dir / "causal_miss_summary.csv", miss_summary)
+    write_csv(out_dir / "fault_dimension_miss_analysis.csv", miss_rows)
+    write_csv(out_dir / "fault_dimension_miss_summary.csv", miss_summary)
     write_csv(out_dir / "test_budget_curve.csv", budget_curve)
     write_csv(out_dir / "scale_sweep.csv", scale_rows)
     write_csv(out_dir / "paired_policy_delta.csv", deltas)
@@ -1278,7 +1356,7 @@ def main() -> None:
             "variants": len(variants),
             "buggy_variants": sum(1 for v in variants if v.bug_type != "correct"),
             "test_cases": len(all_tests),
-            "methods": list(METHOD_CAPABILITIES),
+            "methods": list(METHODS),
             "test_suites": {name: sorted(kinds) for name, kinds in TEST_SUITES.items()},
             "bug_types": dict(Counter(v.bug_type for v in variants)),
         }, handle, indent=2)

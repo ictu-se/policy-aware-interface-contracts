@@ -1,3 +1,0 @@
-contrast,metric,n,mean_delta,ci_low,ci_high,proposed_better,tie,baseline_better
-policy_aware_full_minus_role_matrix,detected,108,0.7778,0.6944,0.8519,84,24,0
-policy_aware_full_minus_role_matrix,risk_flagged,108,0.0509,0.0431,0.0589,84,24,0
