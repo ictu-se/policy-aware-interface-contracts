@@ -1,0 +1,7 @@
+method,known_defects,tp,recall,negative_controls,fp,false_positive_rate
+schema_validation,5,0,0.0,3,0,0.0
+authentication_only,5,2,0.4,3,0,0.0
+role_matrix,5,1,0.2,3,0,0.0
+object_policy_tests,5,2,0.4,3,0,0.0
+property_policy_tests,5,2,0.4,3,0,0.0
+policy_aware_full,5,5,1.0,3,0,0.0

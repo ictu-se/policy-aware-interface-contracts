@@ -239,8 +239,9 @@ def main() -> None:
     for variant in variants:
         policy = policy_map[variant.policy_id]
         tests = tests_by_policy[variant.policy_id]
-        for method in bench.METHOD_CAPABILITIES:
-            findings.extend(bench.run_method(method, policy, variant, tests))
+        execution_trace = bench.materialize_execution(policy, variant, tests)
+        for method in bench.METHODS:
+            findings.extend(bench.run_method(method, policy, variant.variant_id, tests, execution_trace))
     detections, _, _ = bench.summarize_detection(findings, variants)
     risk_rows = risk_sensitivity(detections)
     benign_detail, benign_summary = benign_stress(policies, tests_by_policy, args.seed)

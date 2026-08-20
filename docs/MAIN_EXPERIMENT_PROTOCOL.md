@@ -2,8 +2,8 @@
 
 ## Purpose
 
-The main experiment evaluates policy-aware contract testing through causal
-mechanisms, not repeated random seeds. Each result table must answer why a
+The main experiment evaluates policy-aware contract testing through observable
+fault mechanisms, not repeated random seeds. Each result table identifies why a
 method detects or misses a policy bug.
 
 ## Research Questions Covered
@@ -20,8 +20,11 @@ method detects or misses a policy bug.
 ## Ground Truth
 
 Ground truth is deterministic bug injection. Each endpoint has one correct
-variant and nine buggy variants. The injected bug type defines the expected
-fault family and primary missing contract dimension.
+variant and nine buggy variants. The mutation dispatcher first materializes a
+label-free execution trace. Detection methods receive only the contract subset,
+fixtures, implementation identifier, and observed trace. The injected label is
+joined after findings are emitted to define the expected fault family and
+primary missing contract dimension for scoring.
 
 ## Methods
 
@@ -39,26 +42,29 @@ The campaign compares:
 
 ## Main Outputs
 
-The campaign writes outputs to `results/main_experiment/`:
+The campaign writes outputs to `results/main_experiment_10x/`:
 
 - `method_summary.csv`: precision, recall, F1, and risk-weighted recall.
 - `recall_by_bug_family.csv`: method recall by policy-bug family.
 - `baseline_failure_mechanisms.csv`: baseline misses by bug type and primary
   dimension.
-- `causal_miss_analysis.csv`: false negatives with oracle evidence.
-- `causal_miss_summary.csv`: false negatives grouped by root cause.
+- `fault_dimension_miss_analysis.csv`: false negatives with oracle evidence.
+- `fault_dimension_miss_summary.csv`: false negatives grouped by missing dimension.
 - `first_detection_triggers.csv`: the first generated test kind that detects
   each bug.
 - `exposure_events.csv`: event-level violation and field-exposure evidence.
 - `exposure_summary.csv`: aggregate exposure by bug family.
 - `ablation_loss.csv`: detections and risk lost by each ablation.
 - `casebook.csv`: representative examples explaining each miss mechanism.
-- `MAIN_EXPERIMENT_REPORT.md`: human-readable report for manuscript drafting.
+- `MAIN_EXPERIMENT_REPORT.md`: human-readable experiment report.
 
 ## Run Command
 
 ```bash
-python3 scripts/main_experiment.py
+python3 scripts/main_experiment.py \
+  --seed 20260616 \
+  --multiplier 10 \
+  --out-dir results/main_experiment_10x
 ```
 
 ## Interpretation Rule

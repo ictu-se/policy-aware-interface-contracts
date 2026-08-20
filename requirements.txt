@@ -1,1 +1,2 @@
-# The current benchmark uses only the Python standard library.
+matplotlib>=3.7,<4
+jsonschema>=4.22,<5

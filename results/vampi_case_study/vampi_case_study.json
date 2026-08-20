@@ -1,0 +1,313 @@
+{
+  "source_revision": "f16052dce83f05847133ec98f01c5193a41de7d8",
+  "contract_schema_version": "1.0",
+  "contract_ids": [
+    "cross_owner_book_secret",
+    "cross_subject_password_update",
+    "admin_mass_assignment",
+    "unauthenticated_debug_disclosure",
+    "forgeable_admin_token"
+  ],
+  "secure_base": "http://127.0.0.1:15001",
+  "vulnerable_base": "http://127.0.0.1:15002",
+  "observations": [
+    {
+      "mode": "secure",
+      "test_case": "cross_owner_book_secret",
+      "operation": "GET /books/v1/{book_title}",
+      "oracle": "object_relation",
+      "known_defect": false,
+      "secure_control": true,
+      "violation_observed": false,
+      "status": 404,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "owner": null,
+        "secret_returned": false
+      }
+    },
+    {
+      "mode": "secure",
+      "test_case": "cross_subject_password_update",
+      "operation": "PUT /users/v1/{username}/password",
+      "oracle": "object_relation_and_post_state",
+      "known_defect": false,
+      "secure_control": true,
+      "violation_observed": false,
+      "status": 204,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "target_login_with_new_password": false
+      }
+    },
+    {
+      "mode": "secure",
+      "test_case": "admin_mass_assignment",
+      "operation": "POST /users/v1/register",
+      "oracle": "request_property_and_post_state",
+      "known_defect": false,
+      "secure_control": true,
+      "violation_observed": false,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "registered_admin": false
+      }
+    },
+    {
+      "mode": "secure",
+      "test_case": "unauthenticated_debug_disclosure",
+      "operation": "GET /users/v1/_debug",
+      "oracle": "authentication_response_and_inventory",
+      "known_defect": true,
+      "secure_control": false,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": true,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": true,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": true,
+        "forbidden_side_effect": false,
+        "inventory_violation": true
+      },
+      "evidence": {
+        "password_field_returned": true
+      }
+    },
+    {
+      "mode": "secure",
+      "test_case": "forgeable_admin_token",
+      "operation": "GET /me",
+      "oracle": "credential_integrity",
+      "known_defect": true,
+      "secure_control": false,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": true,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "accepted_subject": "admin"
+      }
+    },
+    {
+      "mode": "vulnerable",
+      "test_case": "cross_owner_book_secret",
+      "operation": "GET /books/v1/{book_title}",
+      "oracle": "object_relation",
+      "known_defect": true,
+      "secure_control": true,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": true,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "owner": "name2",
+        "secret_returned": true
+      }
+    },
+    {
+      "mode": "vulnerable",
+      "test_case": "cross_subject_password_update",
+      "operation": "PUT /users/v1/{username}/password",
+      "oracle": "object_relation_and_post_state",
+      "known_defect": true,
+      "secure_control": true,
+      "violation_observed": true,
+      "status": 204,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": true,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": true,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "target_login_with_new_password": true
+      }
+    },
+    {
+      "mode": "vulnerable",
+      "test_case": "admin_mass_assignment",
+      "operation": "POST /users/v1/register",
+      "oracle": "request_property_and_post_state",
+      "known_defect": true,
+      "secure_control": true,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": true,
+        "response_property_violation": false,
+        "forbidden_side_effect": true,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "registered_admin": true
+      }
+    },
+    {
+      "mode": "vulnerable",
+      "test_case": "unauthenticated_debug_disclosure",
+      "operation": "GET /users/v1/_debug",
+      "oracle": "authentication_response_and_inventory",
+      "known_defect": true,
+      "secure_control": false,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": true,
+        "credential_integrity_violation": false,
+        "function_authorization_violation": true,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": true,
+        "forbidden_side_effect": false,
+        "inventory_violation": true
+      },
+      "evidence": {
+        "password_field_returned": true
+      }
+    },
+    {
+      "mode": "vulnerable",
+      "test_case": "forgeable_admin_token",
+      "operation": "GET /me",
+      "oracle": "credential_integrity",
+      "known_defect": true,
+      "secure_control": false,
+      "violation_observed": true,
+      "status": 200,
+      "signals": {
+        "schema_mismatch": false,
+        "authentication_violation": false,
+        "credential_integrity_violation": true,
+        "function_authorization_violation": false,
+        "object_scope_violation": false,
+        "request_property_violation": false,
+        "response_property_violation": false,
+        "forbidden_side_effect": false,
+        "inventory_violation": false
+      },
+      "evidence": {
+        "accepted_subject": "admin"
+      }
+    }
+  ],
+  "summary": [
+    {
+      "method": "schema_validation",
+      "known_defects": 5,
+      "tp": 0,
+      "recall": 0.0,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    },
+    {
+      "method": "authentication_only",
+      "known_defects": 5,
+      "tp": 2,
+      "recall": 0.4,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    },
+    {
+      "method": "role_matrix",
+      "known_defects": 5,
+      "tp": 1,
+      "recall": 0.2,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    },
+    {
+      "method": "object_policy_tests",
+      "known_defects": 5,
+      "tp": 2,
+      "recall": 0.4,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    },
+    {
+      "method": "property_policy_tests",
+      "known_defects": 5,
+      "tp": 2,
+      "recall": 0.4,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    },
+    {
+      "method": "policy_aware_full",
+      "known_defects": 5,
+      "tp": 5,
+      "recall": 1.0,
+      "negative_controls": 3,
+      "fp": 0,
+      "false_positive_rate": 0.0
+    }
+  ]
+}

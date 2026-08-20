@@ -1,12 +1,12 @@
 {
   "seed": 20260616,
   "multiplier": 10,
-  "elapsed_seconds": 0.5484,
+  "elapsed_seconds": 0.3994,
   "policies": 120,
   "variants": 1200,
   "buggy_variants": 1080,
   "test_cases": 1080,
-  "findings": 129600,
+  "findings": 79200,
   "tables": {
     "first_detection_triggers": 6000,
     "exposure_events": 2500,

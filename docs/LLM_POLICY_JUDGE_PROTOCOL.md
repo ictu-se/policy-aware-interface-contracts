@@ -85,8 +85,8 @@ The experiment writes to `results/llm_policy_judge/`:
 
 ## Main Finding
 
-Several local models identify violations with high recall, but strict causal
-attribution remains much harder. Smaller models often over-trigger one generic
+Several local models identify violations with high recall, but strict primary
+fault-dimension attribution remains much harder. Smaller models often over-trigger one generic
 dimension. Larger Qwen coder models improve strict attribution, but still tend
 to collapse aggregation, endpoint inventory, object scope, and jurisdiction
 scope into field minimization. `qwen3:4b` failed the required JSON format in

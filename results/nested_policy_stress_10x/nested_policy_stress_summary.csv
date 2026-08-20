@@ -2,7 +2,7 @@ method,n,tp,fp,tn,fn,precision,recall,f1,risk_weighted_recall
 audit_contract_tests,280,0,0,40,240,0.0,0.0,0.0,0.0
 basic_policy_aware_full,280,0,0,40,240,0.0,0.0,0.0,0.0
 dependent_policy_full,280,240,0,40,0,1.0,1.0,1.0,1.0
-dependent_without_consent,280,160,0,40,80,1.0,0.6667,0.8,0.6
+dependent_without_consent,280,200,0,40,40,1.0,0.8333,0.9091,0.85
 dependent_without_enhanced_audit,280,200,0,40,40,1.0,0.8333,0.9091,0.9
 dependent_without_purpose_field,280,200,0,40,40,1.0,0.8333,0.9091,0.825
 dependent_without_threshold,280,200,0,40,40,1.0,0.8333,0.9091,0.875

@@ -2,10 +2,10 @@
 
 Included:
 
-- Source code for benchmark generation, main experiment analysis,
+- Source code for contract compilation and conformance checks, benchmark generation, main experiment analysis,
   dependent-policy stress testing, risk-sensitivity and benign-variation
   stress testing, and local LLM policy-judge scoring.
-- Policy-contract schema and generated synthetic benchmark cases.
+- Typed policy-contract schema, five executable VAmPI contracts, and generated synthetic benchmark cases.
 - Deterministic result tables used by the manuscript.
 - Raw local LLM JSONL outputs needed to recompute reported LLM score tables.
 - Experiment protocol documents and dependency note.

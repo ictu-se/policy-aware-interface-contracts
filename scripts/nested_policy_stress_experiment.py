@@ -41,80 +41,30 @@ class Scenario:
     risk: float
 
 
-METHODS = {
-    "schema_validation": set(),
-    "role_matrix": {"role_allowed"},
-    "object_policy_tests": {"role_allowed", "object_or_jurisdiction"},
-    "field_policy_tests": {"role_field"},
-    "audit_contract_tests": {"basic_audit"},
-    "basic_policy_aware_full": {"role_allowed", "object_or_jurisdiction", "role_field", "basic_audit", "inventory"},
-    "dependent_policy_full": {
-        "role_allowed",
-        "object_or_jurisdiction",
-        "role_field",
-        "basic_audit",
-        "inventory",
-        "purpose_field_dependency",
-        "jurisdiction_field_dependency",
-        "consent_field_dependency",
-        "aggregation_threshold",
-        "enhanced_audit_dependency",
-    },
-    "dependent_without_consent": {
-        "role_allowed",
-        "object_or_jurisdiction",
-        "role_field",
-        "basic_audit",
-        "inventory",
-        "purpose_field_dependency",
-        "jurisdiction_field_dependency",
-        "aggregation_threshold",
-        "enhanced_audit_dependency",
-    },
-    "dependent_without_threshold": {
-        "role_allowed",
-        "object_or_jurisdiction",
-        "role_field",
-        "basic_audit",
-        "inventory",
-        "purpose_field_dependency",
-        "jurisdiction_field_dependency",
-        "consent_field_dependency",
-        "enhanced_audit_dependency",
-    },
-    "dependent_without_enhanced_audit": {
-        "role_allowed",
-        "object_or_jurisdiction",
-        "role_field",
-        "basic_audit",
-        "inventory",
-        "purpose_field_dependency",
-        "jurisdiction_field_dependency",
-        "consent_field_dependency",
-        "aggregation_threshold",
-    },
-    "dependent_without_purpose_field": {
-        "role_allowed",
-        "object_or_jurisdiction",
-        "role_field",
-        "basic_audit",
-        "inventory",
-        "jurisdiction_field_dependency",
-        "consent_field_dependency",
-        "aggregation_threshold",
-        "enhanced_audit_dependency",
-    },
-}
+METHODS = (
+    "schema_validation",
+    "role_matrix",
+    "object_policy_tests",
+    "field_policy_tests",
+    "audit_contract_tests",
+    "basic_policy_aware_full",
+    "dependent_policy_full",
+    "dependent_without_consent",
+    "dependent_without_threshold",
+    "dependent_without_enhanced_audit",
+    "dependent_without_purpose_field",
+)
 
 
-BUG_TO_CAPABILITY = {
-    "purpose_conditioned_field": "purpose_field_dependency",
-    "jurisdiction_conditioned_field": "jurisdiction_field_dependency",
-    "consent_gated_field": "consent_field_dependency",
-    "aggregation_threshold_leak": "aggregation_threshold",
-    "emergency_audit_downgrade": "enhanced_audit_dependency",
-    "compound_scope_field": "jurisdiction_field_dependency",
+# The policy facts used by the oracle are independent of the injected scenario
+# label. Each domain declares its allowed purpose and protected field.
+DOMAIN_POLICY = {
+    "health": {"purpose": "treatment", "protected_field": "diagnosis"},
+    "citizen_services": {"purpose": "appeal_review", "protected_field": "disability_marker"},
+    "education": {"purpose": "school_admin", "protected_field": "disciplinary_record"},
+    "business_licensing": {"purpose": "licensing", "protected_field": "owner_identifier"},
 }
+MINIMUM_GROUP_SIZE = 10
 
 
 def scenarios(multiplier: int = 1) -> list[Scenario]:
@@ -260,12 +210,49 @@ def scenarios(multiplier: int = 1) -> list[Scenario]:
     return rows
 
 
-def method_detects(method: str, scenario: Scenario) -> bool:
-    if not scenario.expected_violation:
-        return False
-    if scenario.bug_type == "compound_scope_field":
-        return "jurisdiction_field_dependency" in METHODS[method] and "consent_field_dependency" in METHODS[method]
-    return BUG_TO_CAPABILITY[scenario.bug_type] in METHODS[method]
+def dependent_oracle_reasons(scenario: Scenario) -> list[str]:
+    policy = DOMAIN_POLICY[scenario.domain]
+    protected_returned = policy["protected_field"] in scenario.returned_fields
+    reasons = []
+    if protected_returned and scenario.purpose != policy["purpose"]:
+        reasons.append("purpose_field_dependency")
+    if protected_returned and not scenario.same_jurisdiction:
+        reasons.append("jurisdiction_field_dependency")
+    if protected_returned and not scenario.owner_or_care_relation:
+        reasons.append("object_field_dependency")
+    if protected_returned and not scenario.consent:
+        reasons.append("consent_field_dependency")
+    if "group_count" in scenario.returned_fields and scenario.group_size < MINIMUM_GROUP_SIZE:
+        reasons.append("aggregation_threshold")
+    if scenario.emergency and scenario.audit_level != "enhanced":
+        reasons.append("enhanced_audit_dependency")
+    return reasons
+
+
+def method_oracle_reasons(method: str, scenario: Scenario) -> list[str]:
+    reasons = dependent_oracle_reasons(scenario)
+    if method in {
+        "schema_validation",
+        "role_matrix",
+        "object_policy_tests",
+        "field_policy_tests",
+        "audit_contract_tests",
+        "basic_policy_aware_full",
+    }:
+        # These scenarios preserve structural validity, allowed coarse roles,
+        # endpoint-level access, role-level fields, and standard audit events.
+        return []
+    if method == "dependent_policy_full":
+        return reasons
+    if method == "dependent_without_consent":
+        return [reason for reason in reasons if reason != "consent_field_dependency"]
+    if method == "dependent_without_threshold":
+        return [reason for reason in reasons if reason != "aggregation_threshold"]
+    if method == "dependent_without_enhanced_audit":
+        return [reason for reason in reasons if reason != "enhanced_audit_dependency"]
+    if method == "dependent_without_purpose_field":
+        return [reason for reason in reasons if reason != "purpose_field_dependency"]
+    raise ValueError(method)
 
 
 def summarize(rows: list[dict]) -> list[dict]:
@@ -321,7 +308,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         return
     fields = list(rows[0])
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -383,7 +370,11 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     for scenario in scenarios(args.multiplier):
+        ground_truth_reasons = dependent_oracle_reasons(scenario)
+        if bool(ground_truth_reasons) != scenario.expected_violation:
+            raise AssertionError(f"inconsistent scenario ground truth: {scenario.scenario_id}")
         for method in METHODS:
+            observed_reasons = method_oracle_reasons(method, scenario)
             rows.append({
                 "scenario_id": scenario.scenario_id,
                 "domain": scenario.domain,
@@ -392,7 +383,9 @@ def main() -> None:
                 "primary_dimension": scenario.primary_dimension,
                 "method": method,
                 "expected_violation": int(scenario.expected_violation),
-                "detected": int(method_detects(method, scenario)),
+                "detected": int(bool(observed_reasons)),
+                "oracle_reasons": ";".join(observed_reasons),
+                "ground_truth_reasons": ";".join(ground_truth_reasons),
                 "risk": scenario.risk,
                 "same_jurisdiction": int(scenario.same_jurisdiction),
                 "owner_or_care_relation": int(scenario.owner_or_care_relation),

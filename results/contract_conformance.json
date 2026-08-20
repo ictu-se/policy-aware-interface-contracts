@@ -1,0 +1,84 @@
+{
+  "cases": 13,
+  "passed": 13,
+  "results": [
+    {
+      "case": "five_executable_contracts",
+      "expected": "accept",
+      "observed": "accept",
+      "contracts": 5
+    },
+    {
+      "case": "conjunctive_dependent_requirements",
+      "expected": "accept",
+      "observed": "accept",
+      "contracts": 5
+    },
+    {
+      "case": "missing_required_clause",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: schema error at <root>: 'authentication' is a required property"
+    },
+    {
+      "case": "unknown_relation",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: schema error at object_scope.any_of.0.relation: 'same_owner' is not one of ['equal', 'contains', 'member_of', 'ancestor_of']"
+    },
+    {
+      "case": "unresolved_reference",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: schema error at object_scope.any_of.0.subject_operand: 'owner' does not match '^(caller|token|path|query|header|request|response|fixture|literal)\\\\.[A-Za-z_][A-Za-z0-9_.-]*$'"
+    },
+    {
+      "case": "predicate_type_mismatch",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: invalid equal signature ('String', 'Integer')"
+    },
+    {
+      "case": "unregistered_hierarchy_resolver",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: unregistered hierarchy resolver"
+    },
+    {
+      "case": "empty_role_set",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: schema error at function_authorization.any_role: [] should be non-empty"
+    },
+    {
+      "case": "invalid_aggregation_threshold",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: schema error at property_policy.aggregation.minimum_group_size: 1 is less than the minimum of 2"
+    },
+    {
+      "case": "duplicate_contract_id",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "invalid or duplicate contract id: 'cross_owner_book_secret'"
+    },
+    {
+      "case": "unregistered_adapter",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: unregistered adapter or oracle"
+    },
+    {
+      "case": "inconsistent_inventory_behavior",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: inventory status deprecated requires behavior deprecation_header"
+    },
+    {
+      "case": "conflicting_dependent_requirements",
+      "expected": "reject",
+      "observed": "reject",
+      "diagnostic": "cross_owner_book_secret: conflicting audit requirements under one guard"
+    }
+  ]
+}

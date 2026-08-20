@@ -1,62 +1,34 @@
 # Policy-Aware Interface Contracts
 
-This repository is the replication package for the study:
+This is the clean replication package for the study **Policy-Aware Interface
+Contracts for Testing Access-Control and Privacy Obligations in Service APIs**.
+It contains experiment code, policy fixtures, protocols, and reported results.
+It intentionally excludes manuscript sources, journal templates, letters, local
+logs, caches, and submission files.
 
-**Policy-Aware Interface Contracts for Testing Access-Control and Privacy
-Obligations in Service APIs**
+## Contents
 
-The package contains the benchmark generator, policy-contract schema, generated
-cases, experiment scripts, and result tables used for the manuscript. It does
-not contain manuscript source files, journal templates, cover letters, or local
-submission artifacts.
+- `scripts/`: compiler conformance, benchmark, stress checks, LLM scoring, and VAmPI case-study runner.
+- `configs/`: machine-readable policy-contract schema.
+- `data/`: benchmark cases and VAmPI policy contracts.
+- `results/`: reported result tables and model outputs.
+- `docs/`: experiment and judging protocols.
+- `requirements.txt`: Python dependencies.
 
-## Repository Contents
+## Install
 
-- `scripts/`: executable benchmark and analysis scripts.
-- `configs/`: JSON schema for policy-aware API contracts.
-- `data/`: generated policy variants and policy test cases.
-- `results/`: reproduced result tables and raw local LLM outputs used for
-  scoring.
-- `docs/`: experiment protocols.
-- `requirements.txt`: dependency note. The deterministic benchmark uses only
-  the Python standard library.
-- `MANIFEST.md`: traceability map for included artifacts.
-- `LICENSE`: reuse terms for the replication package.
-
-## Runtime and Archival Status
-
-The deterministic benchmark was verified with Python 3.9.6 and uses only the
-Python standard library. Local LLM inference was run with Ollama 0.30.7. The
-raw LLM outputs included in this repository are the reproducibility source for
-reported model scores, because local model decoding can vary across runtime
-and model revisions.
-
-This GitHub repository is the current public replication package. A versioned
-GitHub release and external archival DOI can be added after journal submission
-or acceptance; no DOI is claimed here.
-
-## Deterministic Benchmark
-
-Run the 10-fold policy-aware contract benchmark:
+Python 3.9 or newer is required.
 
 ```bash
-python3 scripts/policy_contract_benchmark.py \
-  --seed 20260616 \
-  --multiplier 10 \
-  --out-dir results/benchmark_10x
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
 ```
 
-This reproduces the 120-policy benchmark scale:
+The deterministic benchmark uses only the Python standard library. Matplotlib
+is required only to regenerate the case-study figure.
 
-- 120 endpoint policies;
-- 1,200 implementation variants;
-- 1,080 injected buggy variants;
-- 10,800 generated test executions per method;
-- 129,600 test-level findings across all methods.
-
-## Main Experiment Tables
-
-Run the paper-facing main experiment:
+## Controlled Benchmark
 
 ```bash
 python3 scripts/main_experiment.py \
@@ -65,49 +37,79 @@ python3 scripts/main_experiment.py \
   --out-dir results/main_experiment_10x
 ```
 
-The key outputs are:
+This instantiates 12 semantic policy templates 10 times, producing 120
+endpoints, 1,200 implementation variants, 1,080 injected faulty variants, and
+79,200 method-specific execution findings. A mutation dispatcher materializes
+label-free execution traces before any detector runs. Baseline oracles receive
+only contracts, fixtures, implementation identifiers, and observed traces;
+labels are joined only after findings are emitted to compute metrics.
 
-- `results/main_experiment_10x/method_summary.csv`
-- `results/main_experiment_10x/exposure_summary.csv`
-- `results/main_experiment_10x/ablation_loss.csv`
-- `results/main_experiment_10x/baseline_failure_mechanisms.csv`
-- `results/main_experiment_10x/MAIN_EXPERIMENT_REPORT.md`
+## Contract Conformance
 
-## Dependent-Policy Stress Experiment
+```bash
+python3 scripts/contract_conformance.py \
+  --contracts data/vampi_policy_contracts.json \
+  --schema configs/policy_contract_schema.json \
+  --out results/contract_conformance.json
+```
 
-Run the dependent-policy stress test:
+The suite checks the five executable service contracts plus accepted and
+rejected language cases. It covers required clauses, closed relation
+operators, reference namespaces, non-empty role sets, aggregation bounds,
+identifier uniqueness, adapter registration, lifecycle behavior, and
+conflicting dependent requirements.
+
+## Dependent-Policy and Benign-Variation Checks
 
 ```bash
 python3 scripts/nested_policy_stress_experiment.py \
   --multiplier 10 \
   --out-dir results/nested_policy_stress_10x
-```
 
-This reproduces 280 dependent-policy scenarios and 3,080
-method-scenario judgments.
-
-## Risk Sensitivity and Benign-Variation Stress
-
-Run the additional validation checks:
-
-```bash
 python3 scripts/sensitivity_and_benign_stress.py \
   --seed 20260616 \
   --multiplier 10 \
   --out-dir results/sensitivity_and_benign_stress
 ```
 
-This reproduces:
+## VAmPI OpenAPI Case Study
 
-- five risk-weighting schemes: equal, severity-only, current, privacy-heavy,
-  and audit/inventory-heavy;
-- the full suite's rank-1 weighted recall under all five schemes;
-- 4,440 benign policy-compliant response variants with zero false positives.
+The case study uses VAmPI revision
+`f16052dce83f05847133ec98f01c5193a41de7d8` in secure and vulnerable modes.
+Docker and Docker Compose are required.
 
-## Local LLM Policy-Judge Experiments
+```bash
+git clone https://github.com/erev0s/VAmPI.git
+cd VAmPI
+git checkout f16052dce83f05847133ec98f01c5193a41de7d8
+docker build -t policy-vampi:study .
+docker run -d --name policy-vampi-secure \
+  -e vulnerable=0 -p 127.0.0.1:5001:5000 policy-vampi:study
+docker run -d --name policy-vampi-vulnerable \
+  -e vulnerable=1 -p 127.0.0.1:5002:5000 policy-vampi:study
+cd ..
 
-The repository includes the raw local model outputs used for scoring. To
-recompute the score tables from existing outputs:
+python3 scripts/vampi_case_study.py \
+  --contracts data/vampi_policy_contracts.json \
+  --schema configs/policy_contract_schema.json \
+  --secure-base http://127.0.0.1:5001 \
+  --vulnerable-base http://127.0.0.1:5002 \
+  --out-dir results/vampi_case_study
+```
+
+The runner first validates and compiles the five machine-readable contracts,
+rejecting unknown relation operators, unresolved operand namespaces, invalid
+lifecycle combinations, conflicting requirements, and unregistered adapters
+or oracles. It then resets both disposable
+databases, executes the compiled checks, verifies three paired secure-mode
+controls, and writes raw evidence signals, method-level findings, summary
+metrics, and the data-derived figure. Each baseline consumes only its own
+schema, credential, role, object, property, state, or inventory signals;
+known-defect labels are joined only during scoring.
+
+## Local LLM Scoring
+
+Recorded outputs can be rescored without rerunning inference:
 
 ```bash
 python3 scripts/score_llm_policy_judge.py \
@@ -117,76 +119,20 @@ python3 scripts/score_llm_policy_judge.py \
   --results-dir results/llm_prompt_ablation
 ```
 
-To rerun local model inference, install and run Ollama with the model names
-listed in `docs/LLM_POLICY_JUDGE_PROTOCOL.md`, then run:
+Rerunning inference requires Ollama and the model identifiers documented in
+`docs/LLM_POLICY_JUDGE_PROTOCOL.md`.
 
-```bash
-MAX_ITEMS=120 TIMEOUT=300 bash scripts/run_llm_policy_judge_matrix.sh
+## Reported Evidence
 
-python3 scripts/run_llm_prompt_ablation.py \
-  --max-items 120 \
-  --balanced \
-  --out-dir results/llm_prompt_ablation
-```
+- Main benchmark: `results/main_experiment_10x/`
+- Dependent-policy stress: `results/nested_policy_stress_10x/`
+- Sensitivity and benign controls: `results/sensitivity_and_benign_stress/`
+- Executable service case study: `results/vampi_case_study/`
+- Local model judgments: `results/llm_policy_judge/` and `results/llm_prompt_ablation/`
 
-LLM inference is not deterministic across all model/runtime versions. The
-included JSONL outputs are the source used to reproduce the reported score
-tables.
+## Data and Ethics
 
-The fixed-prompt run used these Ollama model identifiers where available in the
-local runtime:
-
-- `deepseek-coder:6.7b` (`ce298d984115`)
-- `gemma3:4b` (`a2af6cc3eb7f`)
-- `llama3.2:3b` (`a80c4f17acd5`)
-- `phi3:mini` (`4f2222927938`)
-- `qwen2.5-coder:1.5b` (`d7372fd82851`)
-- `qwen2.5-coder:3b` (`f72c60cabf62`)
-- `qwen2.5-coder:7b` (`dae161e27b0e`)
-- `qwen2.5-coder:14b` (`9ec8897f747e`)
-- `qwen2.5-coder:32b` (`b92d6a0bd47e`)
-- `qwen2.5:3b` (`357c53fb659c`)
-- `qwen3:4b` (`359d7dd4bcda`)
-
-## Quick Verification
-
-The following commands should complete without third-party Python packages:
-
-```bash
-python3 scripts/policy_contract_benchmark.py --seed 20260616 --multiplier 10 --out-dir /tmp/policy_contract_benchmark_10x
-python3 scripts/main_experiment.py --seed 20260616 --multiplier 10 --out-dir /tmp/main_experiment_10x
-python3 scripts/nested_policy_stress_experiment.py --multiplier 10 --out-dir /tmp/nested_policy_stress_10x
-python3 scripts/sensitivity_and_benign_stress.py --seed 20260616 --multiplier 10 --out-dir /tmp/sensitivity_and_benign_stress
-python3 scripts/score_llm_policy_judge.py --results-dir results/llm_policy_judge
-python3 scripts/score_llm_policy_judge.py --results-dir results/llm_prompt_ablation
-```
-
-These commands regenerate the deterministic benchmark tables and rescore the
-included LLM outputs. On a typical laptop, the deterministic checks complete in
-minutes; rerunning local LLM inference is intentionally excluded from the quick
-path.
-
-## Figure and Table Traceability
-
-- Manuscript Table 1: conformance levels defined in the manuscript and schema.
-- Manuscript Table 2: policy dimensions defined in the manuscript and schema.
-- Manuscript Table 3: `results/main_experiment_10x/main_experiment_summary.json`.
-- Manuscript Table 4: `results/nested_policy_stress_10x/nested_policy_stress_summary.csv`.
-- Figure 1: `results/main_experiment_10x/policy_detection_results.csv`,
-  `results/main_experiment_10x/exposure_summary.csv`, and
-  `results/main_experiment_10x/first_detection_triggers.csv`.
-- Figure 2: `results/main_experiment_10x/method_summary.csv`,
-  `results/sensitivity_and_benign_stress/risk_weight_sensitivity.csv`,
-  `results/sensitivity_and_benign_stress/benign_variation_summary.csv`, and
-  `results/nested_policy_stress_10x/nested_policy_stress_summary.csv`.
-- Figure 3: `results/main_experiment_10x/recall_by_bug_family.csv`.
-- Figure 4: `results/main_experiment_10x/exposure_summary.csv`.
-- Figure 5: `results/main_experiment_10x/ablation_loss.csv`.
-- Figure 6: `results/llm_policy_judge/llm_policy_judge_summary.csv`.
-- Figure 7: `results/llm_policy_judge/llm_policy_judge_by_group.csv`.
-- Figure 8: `results/llm_prompt_ablation/llm_policy_judge_summary.csv`.
-
-## Data Ethics
-
-All benchmark policies, API responses, and test cases are synthetic. The package
-does not include personal data or production API traces.
+The controlled benchmark contains synthetic policies and responses. The VAmPI
+study runs only the project's documented vulnerable-by-design service in local
+disposable containers. No production service, personal data, or private API
+trace is included.
